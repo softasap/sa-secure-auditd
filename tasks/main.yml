@@ -1,0 +1,3 @@
+---
+# tasks file for sa-secure-auditd
+  - include: tasks_auditd.yml

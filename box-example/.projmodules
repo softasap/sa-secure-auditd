@@ -1,0 +1,3 @@
+[submodule "roles/sa-secure-audit-debsums"]
+        path = roles/sa-secure-audit-debsums
+        url = https://github.com/softasap/sa-secure-audit-debsums.git

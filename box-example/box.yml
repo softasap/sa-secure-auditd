@@ -1,0 +1,20 @@
+---
+- hosts: www
+
+  vars:
+    - root_dir: ..
+
+
+  pre_tasks:
+    - debug: msg="Pre tasks section"
+
+  roles:
+     - {
+         role: "sa-secure-audit-debsums"
+       }
+
+
+  tasks:
+
+    - debug: msg="Tasks section"
+

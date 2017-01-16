@@ -1,0 +1,4 @@
+---
+# defaults file for sa-secure-auditd
+
+  auditd_conf_default_props: []
