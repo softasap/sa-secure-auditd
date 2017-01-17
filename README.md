@@ -45,6 +45,20 @@ Advanced:
 ```
 
 
+Hint: viewing auditd reports 
+```bash
+$ sudo journalctl --boot _TRANSPORT=audit
+-- Logs begin at Thu 2016-01-05 09:20:01 CET. --
+Jan 05 09:47:24 arsenic audit[3028]: USER_END pid=3028 uid=0 auid=1000 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_limits,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="root" exe="/usr/bin/sudo" hostname=? addr=? terminal=/dev/pts/4 res=success'
+...
+```
+
+Or, perhaps
+
+```bash
+sudo journalctl -af _TRANSPORT=audit
+```
+
 Example of full audit.rules that correspond to
 https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/
 
