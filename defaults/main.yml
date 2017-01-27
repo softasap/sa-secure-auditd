@@ -1,4 +1,7 @@
 ---
 # defaults file for sa-secure-auditd
 
-  auditd_conf_default_props: []
+  auditd_conf_default_props: 
+    - {regexp: "^log_group =*", line: "log_group = {{auditd_log_group}}"}
+ 
+  auditd_log_group: root # set to syslog if you want to forward audit events

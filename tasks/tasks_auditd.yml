@@ -7,9 +7,16 @@
     tags:
       - auditd
 
-  - name: AuditD | Patch /etc/audit/auditd.conf
+  - name: AuditD | Patch /etc/audit/auditd.conf with default props
     lineinfile: dest=/etc/audit/auditd.conf  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
     with_items: "{{auditd_conf_default_props | default([])}}"
+    become: yes
+    tags:
+      - auditd
+
+  - name: AuditD | Patch /etc/audit/auditd.conf with custom props
+    lineinfile: dest=/etc/audit/auditd.conf  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
+    with_items: "{{auditd_conf_props | default([])}}"
     become: yes
     tags:
       - auditd

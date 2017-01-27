@@ -8,7 +8,13 @@ Example of use: check box-example
 Simple:
 
 ```YAML
+
+custom_auditd_log_group: syslog # default root, change to other user if you plan to log messages
+
 custom_auditd_props:
+    - {regexp: "^log_group =*", line: "log_group = {{auditd_log_group}}"}
+
+custom_auditd_rules:
   - "-D"  # clean rules
   - "-b 320"  # no of bufs for messages
   - "-f 1" # on failure 0 nothing, 1 dmesg, 2 kernel panic
@@ -38,7 +44,8 @@ Advanced:
 
      - {
          role: "sa-secure-auditd",
-         auditd_conf_default_props: "{{custom_auditd_props}}"
+         auditd_conf_props: "{{custom_auditd_props}}",
+         auditd_log_group: custom_auditd_log_group  
        }
 
 
