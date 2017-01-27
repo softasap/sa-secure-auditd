@@ -14,8 +14,9 @@
     tags:
       - auditd
 
-  - name: SASLAUTHD |  Restart service
+  - name: AuditD |  Restart service
     service: name=auditd state=restarted enabled=yes
+    become: yes
     when: docker_test is not defined
     tags:
       - auditd
