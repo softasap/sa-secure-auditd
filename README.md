@@ -52,7 +52,7 @@ Advanced:
 ```
 
 
-Hint: viewing auditd reports 
+Hint: viewing auditd reports
 ```bash
 $ sudo journalctl --boot _TRANSPORT=audit
 -- Logs begin at Thu 2016-01-05 09:20:01 CET. --
@@ -65,6 +65,9 @@ Or, perhaps
 ```bash
 sudo journalctl -af _TRANSPORT=audit
 ```
+
+STIG: Enterprise level auditing setup
+-------------------------------------
 
 Example of full audit.rules that correspond to
 https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/
@@ -244,6 +247,137 @@ https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/
 ## Make the configuration immutable
 -e 2
 ```
+
+Few words about tooling you will use
+------------------------------------
+
+Kernel:
+
+audit: hooks into the kernel to capture events and deliver them to auditd
+Binaries:
+
+auditd: daemon to capture events and store them (log file)
+auditctl: client tool to configure auditd
+audispd: daemon to multiplex events
+aureport: reporting tool which reads from log file (auditd.log)
+ausearch: event viewer (auditd.log)
+autrace: using audit component in kernel to trace binaries
+aulast: similar to last, but instaed using audit framework
+aulastlog: similar to lastlog, also using audit framework instead
+ausyscall: map syscall ID and name
+auvirt: displaying audit information regarding virtual machines
+Files:
+
+audit.rules: used by auditctl to read what rules need to be used
+auditd.conf: configuration file of auditd
+
+
+Strategy: Excluding Events
+--------------------------
+
+The challenge with logging events, is to ensure that you log all important events, while avoiding logging the unneeded ones.
+
+Logging large no of events might be not efficient and affect the performance of the Linux kernel.
+
+To enhance the logging, we first need to determine what events often show up.
+
+
+by executable
+
+```shell
+aureport -ts today -i -x --summary
+
+Executable Summary Report
+=================================
+total  file
+=================================
+1698  /bin/su
+760  /usr/sbin/cron
+87  /lib/systemd/systemd
+75  /usr/sbin/sshd
+41  /sbin/xtables-multi
+30  /usr/bin/sudo
+2  /lib/systemd/systemd-update-utmp
+
+```
+
+by syscall
+
+```shell
+aureport -ts today -i -s --summary
+Syscall Summary Report
+==========================
+total  syscall
+==========================
+2482  setsockopt
+```
+
+by event
+```shell
+aureport -ts today -i -e --summary
+
+Event Summary Report
+======================
+total  type
+======================
+23036  USER_START
+22965  CRED_DISP
+22965  USER_END
+22952  CRED_ACQ
+22948  USER_ACCT
+14767  USER_AUTH
+8113  LOGIN
+2482  NETFILTER_CFG
+2404  USER_ERR
+1756  USER_LOGIN
+360  SERVICE_START
+300  SERVICE_STOP
+88  USER_CMD
+87  CRED_REFR
+27  ANOM_ABEND
+6  SYSTEM_RUNLEVEL
+6  DAEMON_START
+6  DAEMON_END
+3  SYSTEM_SHUTDOWN
+
+Possible Audit Record Types:  https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Security_Guide/sec-Audit_Record_Types.html
+
+Ignoring events
+---------------
+Now we have idea, what type of messages we have on our system, we can filter out not needed events.
+For that we have to make a rule, which matches and states the exclude of exit statement.
+
+Note: The exit statement is used together with syscalls, for others we use exclude.
+
+### Filter by message type
+
+For example disabling all “CWD” (current working directory), we can use a rule like this:
+
+```
+-a exclude,always -F msgtype=CWD  
+```
+
+ausearch tool will help you on examining
+
+```
+sudo ausearch -ts today -m CRED_ACQ
+```
+
+### Filter by multiple rules
+
+Filter by multiple rules
+
+We can combine multiple rules together, by using multiple -F parameters.
+Up to 64 fields are parsed. -F expressions are concatenated via logical AND statement,
+i.e. all fields have to be true, to trigger the action of the audit rule set.
+
+```
+-a exit,never -F arch=b32 -S fork -F success=0 -F path=/usr/lib/vmware-tools -F subj_type=initrc_t -F exit=-2
+-a exit,never -F arch=b64 -S fork -F success=0 -F path=/usr/lib/vmware-tools -F subj_type=initrc_t -F exit=-2
+```
+
+
+
 
 Copyright and license
 ---------------------
