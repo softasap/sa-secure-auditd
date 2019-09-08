@@ -1,22 +1,31 @@
 ---
   - name: AuditD | Install packages
-    apt: pkg="{{item}}"
-    with_items:
-      - auditd
+    apt: pkg="auditd" state="present"
+    retries: 3
+    register: auditd_install_result
+    until: auditd_install_result is not failed
     become: yes
     tags:
       - auditd
 
   - name: AuditD | Patch /etc/audit/auditd.conf with default props
-    lineinfile: dest=/etc/audit/auditd.conf  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
-    with_items: "{{auditd_conf_default_props | default([])}}"
+    lineinfile:
+      dest: /etc/audit/auditd.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      insertafter: "{{ item.insertafter | default('EOF') }}"
+    with_items: "{{ auditd_conf_default_props | default([]) }}"
     become: yes
     tags:
       - auditd
 
   - name: AuditD | Patch /etc/audit/auditd.conf with custom props
-    lineinfile: dest=/etc/audit/auditd.conf  regexp="{{item.regexp}}" line="{{item.line}}" insertafter="{{item.insertafter | default('EOF')}}"
-    with_items: "{{auditd_conf_props | default([])}}"
+    lineinfile:
+      dest: /etc/audit/auditd.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      insertafter: "{{ item.insertafter | default('EOF') }}"
+    with_items: "{{ auditd_conf_props | default([]) }}"
     become: yes
     tags:
       - auditd
